@@ -1,0 +1,1 @@
+{"rule":"THE_SUPERLATIVE","sentence":"^\\QGiven an unknown sample, we compute its `distance' to our training set, and use the average features of the K nearest ones\\E$"}
