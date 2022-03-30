@@ -590,6 +590,7 @@ One basic algorithm to search for the lagrange multiplier matrix is the coordina
 \end{algorithm}
 The inner loop search the minima of $W$ with one variable $\alpha_i$ at one time.
 \subsection{Sequential Minimization Optimization}
+\subsubsection{Mathematical Model}
 If we deal with two variables $\alpha_i, \alpha_j$ chosen at random on optimizing the convex optimization (due to the constraint condition). Apart from the pivot $(\alpha_i, \alpha_j)$ we have other variables fixed. Then $(\alpha_i, \alpha_j)$ constructs a partition for the original quadratic programming problem.
 Then the constraint condition is expanded to
 \begin{gather}
@@ -624,4 +625,7 @@ then
 \begin{equation}
     \frac{\partial}{\partial \alpha_j}W(\alpha_j) = 0 \rightarrow \alpha_j = y_j \frac{y_j - y_i + \zeta(K(x_i, x_i) - K(x_i, x_j))+v_i - v_j}{K(x_i,x_i) + K(x_j, x_j) - 2K(x_i, x_j)}
 \end{equation}
+Take $E_i = (
+    \sum_{k=1}^N \alpha_k y_k K(x_k, x_i) + b
+) - y_i$ as prediction bias.
 \end{document}
