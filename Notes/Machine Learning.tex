@@ -82,6 +82,8 @@
 \newcommand{\bdot}{~\bm{\cdot}~}
 \newcommand{\la}{\langle}
 \newcommand{\ra}{\rangle}
+\newcommand{\new}{\text{new}}
+\newcommand{\old}{\text{old}}
 
 \begin{document}
 \section{K-Nearest Neightbour Algorithm}
@@ -589,12 +591,37 @@ One basic algorithm to search for the lagrange multiplier matrix is the coordina
 The inner loop search the minima of $W$ with one variable $\alpha_i$ at one time.
 \subsection{Sequential Minimization Optimization}
 If we deal with two variables $\alpha_i, \alpha_j$ chosen at random on optimizing the convex optimization (due to the constraint condition). Apart from the pivot $(\alpha_i, \alpha_j)$ we have other variables fixed. Then $(\alpha_i, \alpha_j)$ constructs a partition for the original quadratic programming problem.
-\begin{equation}
-    \alpha_iy_i + \alpha_jy_j = -\sum_{k \neq i,j}^N \alpha_k y_k =   \zeta
-\end{equation}
-then the constraint condition is expanded to
+Then the constraint condition is expanded to
 \begin{gather}
     \arg \min_{\alpha_i, \alpha_j} \frac{1}{2} \alpha_i^2 K(x_i, x_i) + \frac{1}{2}\alpha_j^2 K(x_j, x_j) + \alpha_i\alpha_j y_i y_j K(x_i, x_j) - (\alpha_i + \alpha_j) \notag \\ + \alpha_i y_i \sum_{k\neq i} \alpha_k y_k K(x_i, x_k) + \alpha_j y_j \sum_{k\neq j}
-    \alpha_k y_k K(x_j, x_k) - \sum_{k\neq i, j} \alpha_k
+    \alpha_k y_k K(x_j, x_k) - \sum_{k\neq i, j} \alpha_k \\
+    \text{s.t.}~~\alpha_iy_i + \alpha_jy_j = -\sum_{k \neq i,j}^N \alpha_k y_k =   \zeta,~0 \leq \alpha_i, \alpha_j \leq C
 \end{gather}
+Then constraint condition is shown as
+\begin{equation}
+    \left\{ \begin{aligned}
+        &\alpha_i + \alpha_j = \zeta / y_i &y_i = y_j \\
+        &\alpha_i - \alpha_j = \zeta / y_i &y_i \neq y_j
+    \end{aligned} \right.
+\end{equation}
+And in the optimizing iteration the equality
+\begin{equation}
+    \alpha_i^{\new}y_i + \alpha_j^{\new}y_j = \zeta = \alpha_i^{\old}y_i + \alpha_j^{\old}y_j
+\end{equation}
+then the constraint condition for $\alpha_j^{\new}$ is
+\begin{equation}
+    L \leq \alpha_j^{\new} \leq H,~~(L, H) = \left\{ \begin{aligned}
+        &\left( \max(0, \alpha_j^{\old} - \alpha_i^{\old}), \min(C, C+\alpha_j^{\old} - \alpha_i^{\old}) \right) &y_i = y_j \\
+        &\left( \max(0, \alpha_j^{\old} + \alpha_i^{\old} - C), \min(C, \alpha_j^{\old} + \alpha_i^{\old})\right) &y_i \neq y_j
+    \end{aligned} \right.
+\end{equation}
+With $\alpha_iy_i = \zeta - \alpha_jy_j \rightarrow \alpha_i = y_i(\zeta - \alpha_jy_j)$, target expands to
+\begin{gather}
+    \arg \min_{\alpha_j} W(\alpha_j) \notag \\= \frac{1}{2}\alpha_i^2K(x_i, x_j) + \frac{1}{2}\alpha_j^2K(x_j, x_j) + \alpha_i\alpha_jy_iy_jK(x_i, x_j)-(\alpha_i+\alpha_j) + \alpha_iy_iv_i+\alpha_jy_jv_j \\
+    \text{where}~~v_i = \sum_{k\neq i} \alpha_k y_k K(x_i, x_k)
+\end{gather}
+then
+\begin{equation}
+    \frac{\partial}{\partial \alpha_j}W(\alpha_j) = 0 \rightarrow \alpha_j = y_j \frac{y_j - y_i + \zeta(K(x_i, x_i) - K(x_i, x_j))+v_i - v_j}{K(x_i,x_i) + K(x_j, x_j) - 2K(x_i, x_j)}
+\end{equation}
 \end{document}
