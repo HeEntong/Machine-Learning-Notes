@@ -18,7 +18,7 @@
 \usepackage{comment}
 \usepackage{fancyhdr}
 \usepackage{ctex}
-\setlength{\headheight}{13.59999pt}
+\setlength{\headheight}{15pt}
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \pagestyle{fancy}
@@ -463,7 +463,7 @@ then
 \end{equation}
 Likewise, we obtain a new \textbf{quadratic programming} target
 \begin{gather}
-    \arg \min_{\bm{\alpha}} \frac{1}{2}\sum_{i=1}^N \sum_{j=1}^N \alpha_i \alpha_j y_i y_j \langle \bm{x}_i, \bm{y}_i \rangle - \sum_{i=1}^N \alpha_i  \notag \\ \text{s.t.}~\sum_{i=1}^N \alpha_i y_i = 0,~0 \leq \alpha_i \leq C
+    \arg \min_{\bm{\alpha}} \frac{1}{2}\sum_{i=1}^N \sum_{j=1}^N \alpha_i \alpha_j y_i y_j \langle \bm{x}_i, \bm{x}_j \rangle - \sum_{i=1}^N \alpha_i  \notag \\ \text{s.t.}~\sum_{i=1}^N \alpha_i y_i = 0,~0 \leq \alpha_i \leq C
 \end{gather}
 \subsection{Hinge Loss Function}
 We can give an equivalent description of the original optimizing problem. The minimizing part gives
@@ -493,7 +493,7 @@ such that $\forall x, y \in \mathcal{X}$,
 then $K(x, y)$ is the kernel function, and $\phi(x)$ is the mapping function. For a given kernel $K(x, y)$, the selection for characteristic space and mapping function is not unique. \par
 In non-linear SVM, we take the place of inner function in the optimization by the kernel function, i.e.
 \begin{gather}
-    \arg \min_{\bm{\alpha}} \frac{1}{2}\sum_{i=1}^N \sum_{j=1}^N \alpha_i \alpha_j y_i y_j K(\bm{x}_i,\bm{y}_i) - \sum_{i=1}^N \alpha_i  \notag \\ \text{s.t.}~\sum_{i=1}^N \alpha_i y_i = 0,~0 \leq \alpha_i \leq C
+    \arg \min_{\bm{\alpha}} \frac{1}{2}\sum_{i=1}^N \sum_{j=1}^N \alpha_i \alpha_j y_i y_j K(\bm{x}_i,\bm{x}_j) - \sum_{i=1}^N \alpha_i  \notag \\ \text{s.t.}~\sum_{i=1}^N \alpha_i y_i = 0,~0 \leq \alpha_i \leq C
 \end{gather}
 \subsubsection{Positive Definite Kernel Function}
 The following will give the necessary and sufficient condition for $K(x, y)$ to be \textbf{positive definite kernel}. We first consider mapping function
@@ -511,37 +511,70 @@ the space $\mathcal{S}$ is determined by mapping $\phi$. Define operation $\lang
     \langle f, g \rangle = \sum_{i=1}^N\sum_{j=1}^N \alpha_i \beta_j K(x_i, y_j)
 \end{gather}
 \rule[-5pt]{\linewidth}{0.07em}
-\noindent \textbf{Lemma} The operation is a inner product of $\mathcal{S}$.
+\noindent \textbf{Lemma 1} The operation is a inner product of $\mathcal{S}$.
 \begin{gather}
     \sum_{i=1}^N\sum_{j=1}^N C\alpha_i \beta_j K(x_i, y_j) = C\sum_{i=1}^N\sum_{j=1}^N \alpha_i \beta_j K(x_i, y_j) \longrightarrow \la Cf, g \ra = C\la f, g \ra \\
     \la f, g \ra = \la g, f \ra~~(\text{trivial}) \\
     \sum_{i=1}^N\sum_{j=1}^N \left( (\alpha_i + \beta_i) \gamma_j K(y_i, z_j) \right) = \sum_{i=1}^N\sum_{j=1}^N  \alpha_i \gamma_j K(x_i, z_j) + \sum_{i=1}^N \sum_{j=1}^N \beta_i \gamma_j K(y_i, z_j) \notag\\ \rightarrow \la f+g, h \ra = \la f, h \ra + \la g, h \ra \\
-    \la f, f \ra = \sum_{i=1}^N \sum_{j=1}^N \alpha_i \alpha_j K(x_i, x_j) = A^TG_{\bm{x}}A \geq 0 
+    \la f, f \ra = \sum_{i=1}^N \sum_{j=1}^N \alpha_i \alpha_j K(x_i, x_j) = \bm{\alpha}^TG_{\bm{x}}\bm{\alpha} \geq 0 
 \end{gather}
-The following will give the proof that $\la f, f \ra = 0$ if and only if $f(\bdot) = 0$. It is evident that $\mathcal{S}$ is a closure, then $\forall f, g \in \mathcal{S}, \lambda \in \mathbb{R}$, $f + \lambda g \in \mathcal{S}$. Then
+The following will give the proof that $\la f, f \ra = 0$ if and only if $f(\bdot) = 0$. Necessity is trivial. It is evident that $\mathcal{S}$ is a closure, then $\forall f, g \in \mathcal{S}, \lambda \in \mathbb{R}$, $f + \lambda g \in \mathcal{S}$. Then
 \begin{gather}
     \la f + \lambda g, f + \lambda g \ra = \la f, f \ra + 2\lambda \la f, g \ra + \lambda^2 \la g, g \ra \geq 0 \notag \\
-    \Delta = 4\left(||\la f, f \ra ||^2 - \la f, f \ra \la g, g \ra \right) \leq 0 \rightarrow ||\la f, f \ra ||^2 - \la f, f \ra \la g, g \ra \leq 0
+    \Delta = 4\left(|\la f, f \ra |^2 - \la f, f \ra \la g, g \ra \right) \leq 0 \rightarrow |\la f, f \ra |^2 - \la f, f \ra \la g, g \ra \leq 0
 \end{gather}
 then
 \begin{equation}
-    \forall x \in \mathcal{X}, \la K(\bdot, x), f(\bdot)\ra = f(x) 
+    \forall x \in \mathcal{X}, \la K(\bdot, x), f(\bdot)\ra = \sum_{i=1}^N \alpha_i \la K(\bdot, x), K(\bdot, x_i) \ra= f(x) 
 \end{equation}
 with the inequality above,
 \begin{equation}
-    ||\left\la K(\bdot, x), f(\bdot)\right\ra||^2 \leq \la K(\bdot, x), K(\bdot, x) \ra \la f(\bdot), f(\bdot) \ra
+    |\left\la K(\bdot, x), f(\bdot)\right\ra|^2 \leq \la K(\bdot, x), K(\bdot, x) \ra \la f(\bdot), f(\bdot) \ra
 \end{equation}
-
-
-
-
-
-
-
-
-\begin{comment}
+Where
+\begin{equation}
+    \la K(\bdot, x), K(\bdot, x) \ra = K(x, x)
+\end{equation}
+then
+\begin{equation}
+    |f(x)|^2 \leq K(x, x) \la f(\bdot), f(\bdot) \ra
+\end{equation}
+then if $\la f,f \ra = 0$, $f(x) = 0$ must holds for all $x$
+. We can conclude that operation $\la f, g \ra $ on $f, g$ is a well-defined inner product. \par \noindent
+\rule[-0em]{\linewidth}{0.07em}
+Define norm $||f||$ for all $f \in \mathcal{S}$ as follows
+\begin{equation}
+    ||f|| = \sqrt{\la f, f \ra}
+\end{equation}
+then $\mathcal{S}$ is completed as an Hilbert space $\mathcal{H}$, named \textbf{reproducing kernel Hilbert space}, for kernel $K$ has reproducibility, i.e. $\la K(\bdot, x), f \ra = f(x)$, $\la K(\bdot, x), K(x, \bdot) \ra = K(x, x)$. We can conclude that
+\begin{equation}
+    \boxed{\text{Any kernel function $K$ implicitly defines a reproducing kernel Hilbert space}} \notag
+\end{equation}
+\rule[0em]{\linewidth}{0.07em}
+\textbf{Lemma 2} Kernel $K$ is a positive definite kernel if and only if the Gram matrix of $K$ is half positive definite. \par Necessity: If $G_K$ is half positive definite for arbitrary $\bm{x}$, then as shown above, $K$ determines a RKHS, that is, $\la K(\bdot, x), f \ra = f(x)$, $\la K(\bdot, x), K(x, \bdot) \ra = K(x, x)$ holds. a mapping $\phi: x \mapsto K(\bdot, x) \leftrightarrow \mathcal{H}$ can be built up by defining
+\begin{equation}
+    K(x, y) = \la \phi(x), \phi(y) \ra
+\end{equation} \par
+Sufficiency: If $K$ is a positive definite kernel, then $K(x, y) = \la \phi(x), \phi(y) \ra$. Hence $\forall \bm{\alpha} \in \mathbb{R}^N$,
+\begin{equation}
+    \bm{\alpha}^T G_{K} \bm{\alpha} = \sum_{i=1}^N \alpha_i \sum_{j=1}^N \alpha_j \la \phi(x_i), \phi(y_i) \ra = \left\la \sum_{i=1}^N \alpha_i \phi(x_i) , \sum_{j=1}^N \alpha_j \phi(y_j) \right\ra \geq 0
+\end{equation}
+then $G_K$ is half positive definite. QED
+\subsubsection{Normally-used Kernel Function}
+\noindent \textbf{Linear/Polynomial Kernel} 
+\begin{equation}
+    K(x, y) = \la x, y \ra^d
+\end{equation}
+\textbf{Gaussian/Laplacian Kernel}
+\begin{equation}
+    K(x, y) = -\frac{||x - y||^2}{2\sigma^2} \bigg/ -\frac{||x-y||}{\sigma}
+\end{equation}
+\textbf{Sigmoid Kernel}
+\begin{equation}
+    K(x, y) = \tanh \left( \beta \la x, y \ra + \theta\right)
+\end{equation}
 \subsection{Coordinate Descent}
-One algorithm to search for the lagrange multiplier matrix is the coordinate descent. The following gives the iteration
+One basic algorithm to search for the lagrange multiplier matrix is the coordinate descent. The following gives the iteration
 \begin{algorithm}[H]
     \caption{coordinateDescent($\bm{\alpha}$)}
     \label{coorDes}
@@ -559,5 +592,9 @@ If we deal with two variables $\alpha_i, \alpha_j$ chosen at random on optimizin
 \begin{equation}
     \alpha_iy_i + \alpha_jy_j = -\sum_{k \neq i,j}^N \alpha_k y_k =   \zeta
 \end{equation}
-\end{comment}
+then the constraint condition is expanded to
+\begin{gather}
+    \arg \min_{\alpha_i, \alpha_j} \frac{1}{2} \alpha_i^2 K(x_i, x_i) + \frac{1}{2}\alpha_j^2 K(x_j, x_j) + \alpha_i\alpha_j y_i y_j K(x_i, x_j) - (\alpha_i + \alpha_j) \notag \\ + \alpha_i y_i \sum_{k\neq i} \alpha_k y_k K(x_i, x_k) + \alpha_j y_j \sum_{k\neq j}
+    \alpha_k y_k K(x_j, x_k) - \sum_{k\neq i, j} \alpha_k
+\end{gather}
 \end{document}
