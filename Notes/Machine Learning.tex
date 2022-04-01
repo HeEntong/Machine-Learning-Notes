@@ -1,5 +1,4 @@
 \documentclass[12pt]{article}
-\usepackage[utf8]{inputenc}
 \usepackage{fontspec}
 \setmainfont{Times New Roman}
 \usepackage{tikz}
@@ -265,7 +264,7 @@ The core of logistic regression is to build up \textbf{linear separating hyperpl
     \end{bmatrix}
 \end{equation}
 where $b$ is the bias. \par
-Then if two classes intersect, we take the class $K$ as the standard, then
+Then if two classes intersect, we take the class $K$ as the reference, then
 \begin{equation}
     \log \frac{\Pr(Y = k|\bm{x})}{\Pr(Y=K|\bm{x})} = \bm{w}_k^T\bm{x} \rightarrow \Pr(Y = k|\bm{x}) = \Pr(Y=K|\bm{x}) \exp(\bm{w}_k^T\bm{x})
 \end{equation}
@@ -594,8 +593,7 @@ The inner loop search the minima of $W$ with one variable $\alpha_i$ at one time
 If we deal with two variables $\alpha_i, \alpha_j$ chosen at random on optimizing the convex optimization (due to the constraint condition). Apart from the pivot $(\alpha_i, \alpha_j)$ we have other variables fixed. Then $(\alpha_i, \alpha_j)$ constructs a partition for the original quadratic programming problem.
 Then the constraint condition is expanded to
 \begin{gather}
-    \arg \min_{\alpha_i, \alpha_j} \frac{1}{2} \alpha_i^2 K(x_i, x_i) + \frac{1}{2}\alpha_j^2 K(x_j, x_j) + \alpha_i\alpha_j y_i y_j K(x_i, x_j) - (\alpha_i + \alpha_j) \notag \\ + \alpha_i y_i \sum_{k\neq i} \alpha_k y_k K(x_i, x_k) + \alpha_j y_j \sum_{k\neq j}
-    \alpha_k y_k K(x_j, x_k) - \sum_{k\neq i, j} \alpha_k \\
+    \arg \min_{\alpha_i, \alpha_j} \frac{1}{2} \alpha_i^2 K(x_i, x_i) + \frac{1}{2}\alpha_j^2 K(x_j, x_j) + \alpha_i\alpha_j y_i y_j K(x_i, x_j) - (\alpha_i + \alpha_j) \notag \\ + \alpha_i y_i \sum_{k\neq i, j} \alpha_k y_k K(x_i, x_k) + \alpha_j y_j \sum_{k\neq i,j} \alpha_k y_k K(x_j, x_k) - \sum_{k\neq i, j} \alpha_k \\
     \text{s.t.}~~\alpha_iy_i + \alpha_jy_j = -\sum_{k \neq i,j}^N \alpha_k y_k =   \zeta,~0 \leq \alpha_i, \alpha_j \leq C
 \end{gather}
 Then constraint condition is shown as
@@ -619,13 +617,62 @@ then the constraint condition for $\alpha_j^{\new}$ is
 With $\alpha_iy_i = \zeta - \alpha_jy_j \rightarrow \alpha_i = y_i(\zeta - \alpha_jy_j)$, target expands to
 \begin{gather}
     \arg \min_{\alpha_j} W(\alpha_j) \notag \\= \frac{1}{2}\alpha_i^2K(x_i, x_j) + \frac{1}{2}\alpha_j^2K(x_j, x_j) + \alpha_i\alpha_jy_iy_jK(x_i, x_j)-(\alpha_i+\alpha_j) + \alpha_iy_iv_i+\alpha_jy_jv_j \\
-    \text{where}~~v_i = \sum_{k\neq i} \alpha_k y_k K(x_i, x_k)
+    \text{where}~~v_t = \sum_{k\neq i,j} \alpha_k y_k K(x_t, x_k)
 \end{gather}
 then
 \begin{equation}
     \frac{\partial}{\partial \alpha_j}W(\alpha_j) = 0 \rightarrow \alpha_j = y_j \frac{y_j - y_i + \zeta(K(x_i, x_i) - K(x_i, x_j))+v_i - v_j}{K(x_i,x_i) + K(x_j, x_j) - 2K(x_i, x_j)}
+    \label{val}
 \end{equation}
-Take $E_i = (
-    \sum_{k=1}^N \alpha_k y_k K(x_k, x_i) + b
-) - y_i$ as prediction bias.
+Take 
+\begin{equation}
+    E_t = (
+    \sum_{k=1}^N \alpha_k y_k K(x_k, x_t) + b
+) - y_t = v_t + \alpha_iy_iK(x_i, x_t) + \alpha_jy_jK(x_j,x_t) + b - y_t
+\end{equation} 
+as prediction bias. Then $\alpha_j^{\new}$ expands to
+\begin{equation}
+    \alpha_j^{\new} = \alpha_j^{\old} + \frac{(E_i - E_j)y_j}{K(x_i, x_i) + K(x_j, x_j) - 2K(x_i, x_j)} = \alpha_j^{\old} + \frac{(E_i - E_j)y_j}{||\phi(x_i) - \phi(x_j)||^2}
+\end{equation}
+Also $\alpha_j^{\new}$ requires truncation when exceeds the feasible region, hence
+\begin{equation}
+    \alpha_j^{\new-\text{truncated}} = \left\{ \begin{aligned} &L &\alpha_j^{\new} \leq L \\
+    &\alpha_{j}^{\new} & L < \alpha_j^{\new} \leq H \\
+    &H &H < \alpha_j^{\new} \end{aligned}\right.
+\end{equation}
+then from $\alpha_j^{\new}$, $\alpha_i^{\new} = \alpha_i^{\old} + y_iy_j(\alpha_j^{\old} - \alpha_j^{\new})$.
+Every time in the optimizing iteration, the sample dataset is checked to see if Karush-Kuhn-Tucker Conditions is violated, i.e.
+\begin{equation}
+    \begin{aligned}
+    &\alpha_i = 0 \leftrightarrow y_i(\sum_{j=1}^N \alpha_j y_jK(x_i, x_j) + b) \geq 1 \\
+     0 < &\alpha_i <   C \leftrightarrow y_i(\sum_{j=1}^N \alpha_j y_jK(x_i, x_j) + b) = 1 \\
+     &\alpha_i = C \leftrightarrow y_i(\sum_{j=1}^N \alpha_j y_jK(x_i, x_j) + b) \leq 1
+    \end{aligned}
+\end{equation}
+Then if $0 < \alpha_i{\new} < C$ bias $E$ and valve value $b$ are
+\begin{equation}
+    b_i^{\new} = y_i - \sum_{k=1}^N \alpha_k y_k K(x_i,x_k) = -E_i + \alpha_i^{\old}y_iK(x_i, x_i) + \alpha_j^{\old}y_j K(x_i, x_j) + b^{\old}
+\end{equation}
+Likewise,
+\begin{equation}
+    b_j^{\new} = y_j - \sum_{k=1}^N \alpha_k y_k K(x_j,x_k) = -E_j + \alpha_j^{\old}y_jK(x_i, x_j) + \alpha_j^{\old}y_j K(x_j, x_j) + b^{\old}
+\end{equation}
+Updated value of $b$ depends on the consistence of $\alpha_i/\alpha_j$ with KKT conditions. If both values are valid, take $b^{\new} = (b_i^{\new} + b_j^{\new}) / 2$. The loop ends with updating bias $E$ as 
+\begin{equation}
+    E_i^{\new} = \sum_{k=1}^N \alpha_ky_kK(x_i,x_k) + b^{\new} - y_i
+\end{equation}
+\subsubsection{Implementation}
+\begin{algorithm}
+    \label{SMO}
+    \caption{SMO Algorithm}
+    \begin{algorithmic}
+        \REQUIRE{Input dataset $T = \{ (x_1, y_1),(x_2,y_2),\dots,(x_N,y_N)\},~x_i\in\mathcal{X}, y_i \in \mathcal{H} = \{-1,1\}$}
+        \STATE{initialize $k\gets 0, \bm{\alpha}^{(k)} \gets \bm{0}$}
+        \WHILE{halt condition not met}
+        \STATE{calculate optimization $(\alpha_i^{(k+1)}, \alpha_j^{(k+1)})$, update $E, b$}
+        \STATE{$(\alpha_i^{(k)}, \alpha_j^{(k)}) \gets (\alpha_i^{(k+1)}, \alpha_j^{(k+1)}), k \gets k + 1$}
+        \ENDWHILE
+        \RETURN{$\bm{\alpha}^{(k+1)}$}
+    \end{algorithmic}
+\end{algorithm}
 \end{document}
