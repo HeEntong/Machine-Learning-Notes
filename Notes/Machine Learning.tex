@@ -505,7 +505,7 @@ Then $\forall x_i \in \mathcal{X},\alpha_i \in \mathbb{R}$, define linear mappin
 \begin{equation}
     f(\bdot) = \sum_{i=1}^N \alpha_i K(\bdot, x_i)
 \end{equation} 
-the space $\mathcal{S}$ is determined by mapping $\phi$. Define operation $\langle f, g, \rangle$ in space $\mathcal{S}$ for $f, g$, where
+the space $\mathcal{S}$ is determined by mapping $\phi$. Define operation $\langle f, g \rangle$ in space $\mathcal{S}$ for $f, g$, where
 \begin{gather}
     f(\bdot) = \sum_{i=1}^N \alpha_i K(\bdot, x_i),~~
     g(\bdot) = \sum_{j=1}^N \beta_j K(\bdot, y_j) \\
@@ -669,6 +669,8 @@ Updated value of $b$ depends on the consistence of $\alpha_i/\alpha_j$ with KKT 
         \REQUIRE{Input dataset $T = \{ (x_1, y_1),(x_2,y_2),\dots,(x_N,y_N)\},~x_i\in\mathcal{X}, y_i \in \mathcal{H} = \{-1,1\}$}
         \STATE{initialize $k\gets 0, \bm{\alpha}^{(k)} \gets \bm{0}$}
         \WHILE{halt condition not met}
+        \STATE{search $\alpha_i^{(k)}$}
+        \STATE{search $\arg \min_{\alpha_{j}^{(k)}} E$ under $\alpha_i^{(k)}$}
         \STATE{calculate optimization $(\alpha_i^{(k+1)}, \alpha_j^{(k+1)})$, update $E, b$}
         \STATE{$(\alpha_i^{(k)}, \alpha_j^{(k)}) \gets (\alpha_i^{(k+1)}, \alpha_j^{(k+1)}), k \gets k + 1$}
         \ENDWHILE
